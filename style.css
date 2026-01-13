@@ -1,0 +1,781 @@
+/* --- Prevent horizontal scroll (mobile DM should never side-scroll) --- */
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+svg {
+  shape-rendering: geometricPrecision
+}
+
+:root {
+  --bg: #ffffff;
+  --text: #0b0b0c;
+  --muted: #6f6f73;
+  --line: #efeff1;
+  --bubble-in: #f1f2f4;
+  --bubble-in-text: #111214;
+  --bubble-out-text: #ffffff;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .08);
+  --out-grad: linear-gradient(180deg, #a133ff 0%, #6c3cff 55%, #5a4bff 100%);
+  --radius: 22px;
+  --radius-tight: 10px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Instagram-like reaction overlap */
+  --reaction-stack-pad: 18px;
+  /* space reserved under the ROW (prevents next message collision) */
+  --reaction-bottom: -10px;
+  /* negative => pill overlaps bubble edge */
+}
+
+* {
+  box-sizing: border-box
+}
+
+svg {
+  display: block
+}
+
+html,
+body {
+  height: 100%
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: #f7f7f8;
+  /* app background around phone */
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.app {
+  width: min(520px, 100%);
+  height: min(980px, 100vh);
+  margin: 0 auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  border-left: 1px solid #f0f0f1;
+  border-right: 1px solid #f0f0f1;
+}
+
+.topbar {
+  height: 64px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #111;
+}
+
+.icon-btn:active {
+  background: #f2f2f3
+}
+
+.icon-btn svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  shape-rendering: geometricPrecision
+}
+
+.titleblock {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #ddd;
+  flex: 0 0 auto;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block
+}
+
+.namewrap {
+  min-width: 0
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 2px
+}
+
+.chatname {
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 230px;
+}
+
+.chev {
+  width: 18px;
+  height: 18px;
+  color: #111;
+  display: block;
+  shape-rendering: geometricPrecision
+}
+
+.status {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px
+}
+
+.thread {
+  flex: 1;
+  overflow: auto;
+  padding: 12px 12px 10px;
+  scroll-behavior: smooth;
+  background: var(--bg);
+  overflow-x: hidden;
+}
+
+.day-sep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0 14px;
+  color: #8a8a8f;
+  font-size: 12px;
+}
+
+.day-sep::before,
+.day-sep::after {
+  content: "";
+  height: 1px;
+  background: #ededf0;
+  flex: 1;
+}
+
+.day-sep span {
+  padding: 0 10px
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 2px 0;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.row.in {
+  justify-content: flex-start;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: end;
+  align-content: end;
+}
+
+.row.out {
+  justify-content: flex-end;
+  display: flex;
+}
+
+.side-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #ddd;
+  flex: 0 0 auto;
+  opacity: 1;
+  align-self: end;
+}
+
+.side-avatar.hidden {
+  visibility: hidden
+}
+
+.side-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block
+}
+
+.bubbleStack {
+  max-width: 78%;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  position: relative;
+  min-width: 0;
+}
+
+.row.out .bubbleStack {
+  align-items: flex-end
+}
+
+.row.out .bubbleStack {
+  justify-self: end
+}
+
+.row.in .side-avatar {
+  grid-column: 1
+}
+
+.row.in .bubbleStack {
+  grid-column: 2
+}
+
+.row.in .bubbleStack {
+  justify-self: start
+}
+
+.replyLabel {
+  font-size: 11px;
+  color: #9a9aa0;
+  margin: 4px 0 2px;
+}
+
+.replyPreview {
+  max-width: 100%;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: #f4f4f6;
+  color: #3a3a3d;
+  font-size: 13px;
+  line-height: 1.2;
+  box-shadow: none;
+}
+
+.bubble {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 16px;
+  line-height: 1.32;
+  position: relative;
+  box-shadow: none;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.bubble.in {
+  background: var(--bubble-in);
+  color: var(--bubble-in-text);
+}
+
+.bubble.out {
+  background: var(--out-grad);
+  color: var(--bubble-out-text);
+}
+
+.bubble.tight-top-in {
+  border-top-left-radius: var(--radius-tight)
+}
+
+.bubble.tight-bottom-in {
+  border-bottom-left-radius: var(--radius-tight)
+}
+
+.bubble.tight-top-out {
+  border-top-right-radius: var(--radius-tight)
+}
+
+.bubble.tight-bottom-out {
+  border-bottom-right-radius: var(--radius-tight)
+}
+
+.reaction {
+  position: absolute;
+  bottom: var(--reaction-bottom);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #ededf0;
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 1;
+  color: #111;
+}
+
+.row.in .reaction {
+  right: 12px
+}
+
+.row.out .reaction {
+  left: 12px
+}
+
+.reaction .cnt {
+  font-size: 12px;
+  color: #6c6c71;
+  margin-left: 2px;
+}
+
+.spacer {
+  height: 8px
+}
+
+.composer {
+  padding: 10px 10px 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+}
+
+.cam {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 0;
+  background: #2f6cff;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.cam svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  shape-rendering: geometricPrecision
+}
+
+.cam:active {
+  filter: brightness(.95)
+}
+
+.pill {
+  flex: 1;
+  height: 44px;
+  border-radius: 999px;
+  background: #f1f2f4;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  min-width: 0;
+}
+
+.placeholder {
+  color: #8c8c91;
+  font-size: 15px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pillActions {
+  display: flex;
+  gap: 10px;
+  color: #111;
+  opacity: .9;
+}
+
+.pillActions svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  shape-rendering: geometricPrecision
+}
+
+.miniIcon {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: inherit
+}
+
+.miniIcon:active {
+  transform: scale(.98)
+}
+
+.heart svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+  shape-rendering: geometricPrecision
+}
+
+.jump {
+  position: absolute;
+  right: 14px;
+  bottom: 82px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid #ededf0;
+  background: #fff;
+  box-shadow: var(--shadow);
+  display: none;
+  place-items: center;
+  color: #111;
+}
+
+.jump svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  shape-rendering: geometricPrecision
+}
+
+.jump.show {
+  display: grid
+}
+
+@media (max-width: 520px) {
+  body {
+    background: var(--bg)
+  }
+
+  .app {
+    height: 100vh;
+    border: 0
+  }
+}
+
+
+/* Don't change the bubbleStack height; reserve space on the row instead (keeps avatar aligned) */
+.bubbleStack.has-reaction {
+  padding-bottom: 0
+}
+
+/* Preferred: modern browsers */
+@supports selector(:has(*)) {
+  .row:has(.bubbleStack.has-reaction) {
+    padding-bottom: var(--reaction-stack-pad);
+  }
+}
+
+/* Fallback (if :has() is not supported): add class `has-reaction` on .row via JS */
+.row.has-reaction {
+  padding-bottom: var(--reaction-stack-pad);
+}
+
+/* Tiny nudge so incoming avatar sits like Instagram */
+.row.in .side-avatar {
+  margin-bottom: 2px;
+}
+
+/* ---- Media & Link cards (Instagram-ish) ---- */
+.mediaLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.bubble.media {
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.mediaImg {
+  display: block;
+  max-width: min(280px, 72vw);
+  border-radius: 18px;
+}
+
+.mediaVideo {
+  display: block;
+  width: min(280px, 72vw);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.mediaAudio {
+  width: min(280px, 72vw);
+}
+
+.bubble.card {
+  padding: 0;
+  background: transparent;
+}
+
+.linkCard {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(0, 0, 0, .04);
+  border: 1px solid rgba(0, 0, 0, .10);
+  border-radius: 18px;
+  padding: 10px 12px;
+  max-width: min(320px, 78vw);
+}
+
+.linkCard.out {
+  background: rgba(255, 255, 255, .92);
+}
+
+.lcTop {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  opacity: .72;
+  margin-bottom: 6px;
+}
+
+.lcKind {
+  font-weight: 800;
+}
+
+.lcOwner {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lcTitle {
+  font-weight: 900;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.lcDesc {
+  font-size: 13px;
+  opacity: .86;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* ---- Load older (Instagram real-ish: subtle text link) ---- */
+.thread .loadOlderWrap {
+  display: flex;
+  justify-content: center;
+  margin: 6px 0 14px;
+}
+
+.thread .loadOlderBtn {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  color: #8e8e93 !important;
+  /* Instagram-ish muted */
+  font-family: var(--font) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+
+  padding: 6px 10px !important;
+  border-radius: 999px !important;
+
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .08s ease, transform .08s ease, color .08s ease;
+}
+
+.thread .loadOlderBtn:hover {
+  background: rgba(0, 0, 0, .04) !important;
+  color: #6f6f73 !important;
+}
+
+.thread .loadOlderBtn:active {
+  transform: scale(.98);
+  background: rgba(0, 0, 0, .06) !important;
+}
+
+.thread .loadOlderBtn:focus-visible {
+  outline: 2px solid rgba(47, 108, 255, .35);
+  outline-offset: 2px;
+}
+
+/* =============================
+   Crisp UI Icon Pack (CSS mask)
+   - Replaces ONLY UI icons (topbar/composer/jump)
+   - Leaves chat bubbles untouched
+   ============================= */
+
+:root {
+  /* Inline SVG masks */
+  --m-back: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15 18l-6-6 6-6' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --m-phone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 3h3l2 5-2 1c1.3 2.6 3.4 4.7 6 6l1-2 5 2v3c0 1-1 2-2 2-9.4 0-17-7.6-17-17 0-1 1-2 2-2z' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --m-video: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='7' width='13' height='10' rx='2' ry='2' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M16 10l5-3v10l-5-3z' fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --m-info: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M12 10v6' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M12 7h.01' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+
+  --m-camera: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 7h2l1.2-2h3.6L15 7h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3z' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='12' cy='13' r='3' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+  --m-mic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 14a3 3 0 0 0 3-3V7a3 3 0 0 0-6 0v4a3 3 0 0 0 3 3z' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M19 11a7 7 0 0 1-14 0' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M12 18v3' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  --m-photo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='4' y='6' width='16' height='14' rx='2' ry='2' fill='none' stroke='%23000' stroke-width='2'/%3E%3Ccircle cx='9' cy='11' r='1.5' fill='%23000'/%3E%3Cpath d='M20 16l-5-5-5 6-2-2-4 5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --m-emoji: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M8.5 10h.01' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M15.5 10h.01' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M8.5 14.5c1.1 1.2 2.3 1.8 3.5 1.8s2.4-.6 3.5-1.8' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --m-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M12 8v8' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M8 12h8' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+
+  --m-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 5v12' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M7 14l5 5 5-5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* Hide existing inline SVGs for UI buttons (not chat bubbles) */
+.topbar .icon-btn svg,
+.composer .cam svg,
+.composer .miniIcon svg,
+.jump svg {
+  display: none !important;
+}
+
+/* Replace with crisp mask icons */
+.topbar .icon-btn,
+.composer .cam,
+.composer .miniIcon{
+  position: relative;
+}
+
+/* jump 버튼은 원래처럼 우하단에 떠있게 고정 */
+.jump{
+  position: absolute !important;
+  right: 14px !important;
+  bottom: 82px !important;
+}
+
+.topbar .icon-btn::before,
+.composer .cam::before,
+.composer .miniIcon::before,
+.jump::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  display: block;
+  background-color: currentColor;
+
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: 100% 100%;
+}
+
+/* Topbar: left back button */
+.topbar>.icon-btn::before {
+  -webkit-mask-image: var(--m-back);
+  mask-image: var(--m-back);
+}
+
+/* Topbar: right action icons (phone, video, info) */
+.topbar .actions .icon-btn:nth-child(1)::before {
+  -webkit-mask-image: var(--m-phone);
+  mask-image: var(--m-phone);
+}
+
+.topbar .actions .icon-btn:nth-child(2)::before {
+  -webkit-mask-image: var(--m-video);
+  mask-image: var(--m-video);
+}
+
+.topbar .actions .icon-btn:nth-child(3)::before {
+  -webkit-mask-image: var(--m-info);
+  mask-image: var(--m-info);
+}
+
+/* Composer: camera (left) */
+.composer .cam {
+  color: #fff;
+}
+
+.composer .cam::before {
+  -webkit-mask-image: var(--m-camera);
+  mask-image: var(--m-camera);
+}
+
+/* Composer: right icons (mic, photo, emoji, plus) */
+.composer .pillActions {
+  color: #111;
+}
+
+.composer .pillActions .miniIcon:nth-child(1)::before {
+  -webkit-mask-image: var(--m-mic);
+  mask-image: var(--m-mic);
+}
+
+.composer .pillActions .miniIcon:nth-child(2)::before {
+  -webkit-mask-image: var(--m-photo);
+  mask-image: var(--m-photo);
+}
+
+.composer .pillActions .miniIcon:nth-child(3)::before {
+  -webkit-mask-image: var(--m-emoji);
+  mask-image: var(--m-emoji);
+}
+
+.composer .pillActions .miniIcon:nth-child(4)::before {
+  -webkit-mask-image: var(--m-plus);
+  mask-image: var(--m-plus);
+}
+
+/* Jump button (down arrow) */
+.jump {
+  color: #111;
+}
+
+.jump::before {
+  -webkit-mask-image: var(--m-down);
+  mask-image: var(--m-down);
+}
